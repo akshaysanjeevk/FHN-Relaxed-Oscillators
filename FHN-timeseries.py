@@ -29,14 +29,14 @@ params = {
     'e' : .001,
     'k' : .6,
     'b' : 70,
-    'D' : .4e3
+    'D' : 2e3
 }
 
 y0 = np.random.uniform(0.1, 0.9, 2*params['N'])  
 # y0 = np.zeros(2*params['N'])
-tspan = (0, 10)
+tspan = (0, 1e-4)
 sol = spy.integrate.solve_ivp(lambda t, y: FHNString(t, y, params), 
-                tspan, y0, t_eval=np.linspace(0, 10, 100),
+                tspan, y0, t_eval=np.linspace(0, 1e-4, 100),
                 method='RK45')
 
 
