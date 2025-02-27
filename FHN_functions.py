@@ -1,34 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def FHNString(t, y, parms):#string
-    N = parms['N']
-    u = y[:N]
-    v = y[N:]
-    dudt = np.zeros(N)
-    dvdt = np.zeros(N)
-    for i in range(N):
-        dudt[i] = u[i] * (1 - u[i]) * (u[i] - parms['a']) - v[i]
-        if i > 0 and i < N - 1:
-            dvdt[i] = parms['e'] * (parms['k'] * u[i] - v[i] - parms['b']) + parms['D'] * (v[i-1] + v[i+1] - 2 * v[i])
-        elif i == 0:
-            dvdt[i] = parms['D'] * (v[1] - v[i])  
-        elif i == N - 1:
-            dvdt[i] = parms['D'] * (v[i-1] - v[i])  
-    return np.concatenate([dudt, dvdt])
 
-def singleFHN(t, y, params):
-    u=y[0]; v=y[1]
-    dudt = u*(1 - u)*(u - params['a']) - v
-    dvdt = params['e']*(params['k']*u - v - params['b'])
+
+
+def FHN(state, t, eps, a, b, I):
+    u, v = state  
+    dudt = u - (u**3) / 3 - v + I
+    dvdt = eps * (u + a - b*v) 
     return [dudt, dvdt]
-
-def fitzhugh_nagumo(state, t, epsilon, a, b, I):
-    u, v = state
-    du_dt = u - (u**3) / 3 - v + I
-    dv_dt = epsilon * (u + a - b * v)
-    return [du_dt, dv_dt]
-
 
 def FHN_String(state, t, eps, a, b, I, D):
     N = len(state) // 2  
@@ -45,6 +25,26 @@ def FHN_String(state, t, eps, a, b, I, D):
         elif i == N - 1:  # Right boundary
             dvdt[i] = eps * (u[i] + a - b * v[i]) + D * (v[i-1] - v[i])
     
-    return np.concatenate([dudt, dvdt])
+    return np.hstack((dudt, dvdt))
 
-        
+def FHN2(state, t, a, e, k, b):
+    u, v = state
+    dudt = u*(1 - u)*(u-a) - v
+    dvdt = e*(k*u - v - b)
+    return np.hstack((dudt, dvdt))
+
+def FHN2_String(state, t, a, e, k, b, D):#string
+    N = len(state) // 2  
+    u = state[:N]  
+    v = state[N:]  
+    dudt = np.zeros(N)
+    dvdt = np.zeros(N)
+    for i in range(N):
+        dudt[i] = u[i]*(1 - u[i])*(u[i] - a) - v[i]
+        if i > 0 and i < N - 1:
+            dvdt[i] = e * (k*u[i] - v[i] - b) + D*(v[i-1] + v[i+1] - 2*v[i])
+        elif i == 0:
+            dvdt[i] = D*(v[1] - v[i])  
+        elif i == N - 1:
+            dvdt[i] = D*(v[i-1] - v[i])  
+    return np.hstack([dudt, dvdt])       
