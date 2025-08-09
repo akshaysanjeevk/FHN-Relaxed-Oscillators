@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 
 
 
-def FHN(state, t, eps, a, b, I):
+def FHN(state, t, e, a, b, k):
     u, v = state  
-    dudt = u - (u**3) / 3 - v + I
-    dvdt = eps * (u + a - b*v) 
+    # dudt = u - (u**3) / 3 - v + I
+    # dvdt = eps * (u + a - b*v) 
+    dudt = u*(1-u)*(u-a) - v
+    dvdt = e*(k*u-v-b)
+    
     return [dudt, dvdt]
 
 def FHN_String(state, t, eps, a, b, I, D):
