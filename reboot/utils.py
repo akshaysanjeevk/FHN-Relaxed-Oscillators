@@ -13,24 +13,23 @@ def solveFHN(prm):
     
     t_vec = np.linspace(0, prm['tmax'], prm['tn'])
     
-    sol = spy.solve_ivp(FHN, (t_vec[0], t_vec[-1]), prm['y0'], t_eval=t_vec)
+    sol = spy.solve_ivp(FHN, (0 , prm['tmax']), prm['y0'], method='RK45' )
     return sol.y, sol.t
+
 
 def FHNString(prm):
     # N = y//2
     def core(t, y):
-        u = y[0,:]; v = y[1,:]
+        u = y[:prm['N']]; v = y[prm['N']:]
         dudt = u*(1-u)*(u-prm['a']) - v 
         
         dvdt0 =  prm['D']*(v[1]-v[0]); dvdtn = prm['D']*(v[-2]-v[-1])
         coupling = v[0:-2] + v[2:] - 2*v[1:-1]
-        dvdti = prm['e'] *(prm['k']*u[1:-2]  - v[1:-2] -prm['b']) +prm['D']*coupling
+        dvdti = prm['e'] *(prm['k']*u[1:-1]  - v[1:-1] -prm['b']) +prm['D']*coupling
         
-        dvdt = np.concatenate(dvdt0, dvdti, dvdtn)
-
-        return np.array([dudt],[dvdt])
+        # dvdt = np.concatenate([np.array(dvdt0), dvdti, np.array(dvdtn)])
+        dvdt = np.hstack(([dvdt0], dvdti, [dvdtn]))
+        return np.concatenate([dudt,dvdt])
     
-    t_vec = np.linspace(0, prm['tmax'], prm['tn'])
-    
-    sol = spyint.solve_ivp(core, (t_vec[0], t_vec[-1]), prm['y0'], t_eval=t_vec)
+    sol = spyint.solve_ivp(core, (0,prm['tmax']), prm['y0'], method='RK45')
     return sol.y, sol.t
